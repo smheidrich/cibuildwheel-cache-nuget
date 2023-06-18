@@ -31,6 +31,15 @@ jobs:
       - name: Install dependencies
         run: |
           cd cibuildwheel; python -m pip install ".[test]"
+      - name: Determine CIBW cache path
+        shell: bash
+        run: >
+          ( echo -n 'cache_path='; python3 -c 'import platformdirs; print(platformdirs.user_cache_path(appname="cibuildwheel", appauthor="pypa"))' ) >> "$GITHUB_OUTPUT"
+        id: cibw_cache_info
+      - uses: actions/cache@v3
+        with:
+          path: ${{ steps.cibw_cache_info.outputs.cache_path }}
+          key: ${{ runner.os }}-cibw
       - name: Generate a sample project
         run: |
           cd cibuildwheel; python -m test.test_projects test.test_0_basic.basic_project sample_proj
