@@ -23,8 +23,19 @@ jobs:
         os: [windows-2019]
     steps:
       - uses: actions/checkout@v3
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.13.1
-      - uses: actions/upload-artifact@v3
+      - name: Check out cibuildwheel (needed for tests)
+        uses: actions/checkout@v3
         with:
-          path: ./wheelhouse/*.whl
+          repository: pypa/cibuildwheel
+          path: cibuildwheel
+      - name: Install dependencies
+        run: |
+          cd cibuildwheel; python -m pip install ".[test]"
+      - name: Generate a sample project
+        run: |
+          cd cibuildwheel; python -m test.test_projects test.test_0_basic.basic_project sample_proj
+      - name: Run a sample build (GitHub Action)
+        uses: pypa/cibuildwheel@v2.13.1
+        with:
+          package-dir: cibuildwheel/sample_proj
+          output-dir: wheelhouse
